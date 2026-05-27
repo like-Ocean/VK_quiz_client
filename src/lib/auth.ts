@@ -1,4 +1,4 @@
-import type { AuthUser, UserRole } from '@/lib/types';
+import type { AuthUser } from '@/lib/types';
 
 const KEY = 'quizmaster_user';
 
@@ -18,10 +18,6 @@ export function setUser(user: AuthUser) {
 
 export function clearUser() {
     localStorage.removeItem(KEY);
-}
-
-export function roleFromEmail(email: string): UserRole {
-    return email.toLowerCase().includes('organizer') ? 'organizer' : 'participant';
 }
 
 export function nameFromEmail(email: string): string {

@@ -4,7 +4,7 @@ import { Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LabeledInput } from '@/components/LabeledInput';
-import { nameFromEmail, roleFromEmail, setUser } from '@/lib/auth';
+import { nameFromEmail, setUser } from '@/lib/auth';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -14,9 +14,8 @@ export default function Login() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!email || !password) return;
-        const role = roleFromEmail(email);
-        setUser({ email, name: nameFromEmail(email), role });
-        navigate(role === 'organizer' ? '/organizer/dashboard' : '/participant/dashboard');
+        setUser({ email, name: nameFromEmail(email) });
+        navigate('/dashboard');
     }
 
     return (
@@ -62,9 +61,8 @@ export default function Login() {
                     </p>
 
                     <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-                        <p className="font-medium mb-1">Demo Accounts:</p>
-                        <p>Organizer: organizer@quiz.com</p>
-                        <p>Participant: participant@quiz.com</p>
+                        <p className="font-medium mb-1">Demo Account:</p>
+                        <p>demo@quiz.com</p>
                     </div>
                 </CardContent>
             </Card>

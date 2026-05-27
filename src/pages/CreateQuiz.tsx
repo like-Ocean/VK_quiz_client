@@ -77,7 +77,7 @@ export default function CreateQuiz() {
   }
 
   function handleSave() {
-    navigate("/organizer/dashboard");
+    navigate("/dashboard");
   }
 
   return (
@@ -87,7 +87,7 @@ export default function CreateQuiz() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/organizer/dashboard")}
+            onClick={() => navigate("/dashboard")}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -274,7 +274,7 @@ export default function CreateQuiz() {
         <div className="flex justify-end gap-4 mt-8">
           <Button
             variant="outline"
-            onClick={() => navigate("/organizer/dashboard")}
+            onClick={() => navigate("/dashboard")}
           >
             Cancel
           </Button>

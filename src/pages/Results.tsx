@@ -3,7 +3,6 @@ import { Trophy, Medal, Award, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { leaderboard } from "@/lib/mockData";
-import { getUser } from "@/lib/auth";
 
 function getRankBadge(rank: number) {
   if (rank === 1) return "bg-chart-1/20 text-chart-1 border-chart-1/30";
@@ -21,8 +20,6 @@ function getRankIcon(rank: number) {
 
 export default function Results() {
   const navigate = useNavigate();
-  const user = getUser();
-
   const totalParticipants = leaderboard.length;
   const questions = leaderboard[0]?.questions ?? 0;
   const avgScore = Math.round(
@@ -31,8 +28,7 @@ export default function Results() {
   const completionRate = 96;
 
   function goDashboard() {
-    if (user?.role === "organizer") navigate("/organizer/dashboard");
-    else navigate("/participant/dashboard");
+    navigate("/dashboard");
   }
 
   return (
@@ -125,11 +121,7 @@ export default function Results() {
             <Home className="w-4 h-4" />
             Back to Dashboard
           </Button>
-          {user?.role === "participant" && (
-            <Button onClick={() => navigate("/participant/dashboard")}>
-              Join Another Quiz
-            </Button>
-          )}
+          <Button onClick={() => navigate("/dashboard")}>Join Another Quiz</Button>
         </div>
       </main>
     </div>

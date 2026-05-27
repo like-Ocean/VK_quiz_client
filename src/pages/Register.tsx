@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LabeledInput } from '@/components/LabeledInput';
 import { setUser } from '@/lib/auth';
-import type { UserRole } from '@/lib/types';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [role, setRole] = useState<UserRole>('participant');
   const [error, setError] = useState('');
 
   function handleSubmit(e: React.FormEvent) {
@@ -24,8 +22,8 @@ export default function Register() {
           setError('Passwords do not match');
           return;
       }
-      setUser({ name, email, role });
-      navigate(role === 'organizer' ? '/organizer/dashboard' : '/participant/dashboard');
+      setUser({ name, email });
+      navigate('/dashboard');
   }
 
   return (
@@ -73,32 +71,6 @@ export default function Register() {
                 onChange={(e) => setConfirm(e.target.value)}
                 required
               />
-              <div className="space-y-2">
-                <label>I am a:</label>
-                <div className="flex gap-6">
-                    <label className="flex items-center gap-2 font-normal cursor-pointer">
-                        <input
-                            type="radio"
-                            name="role"
-                            value="participant"
-                            checked={role === 'participant'}
-                            onChange={() => setRole('participant')}
-                        />
-                        <span>Participant</span>
-                    </label>
-                    <label className="flex items-center gap-2 font-normal cursor-pointer">
-                        <input
-                            type="radio"
-                            name="role"
-                            value="organizer"
-                            checked={role === 'organizer'}
-                            onChange={() => setRole('organizer')}
-                        />
-                        <span>Organizer</span>
-                    </label>
-                </div>
-              </div>
-
               {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button type="submit" className="w-full">

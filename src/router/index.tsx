@@ -1,18 +1,26 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, useParams } from 'react-router-dom';
 // import { Protected } from '@/components/Protected';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
-import OrganizerDashboard from '@/pages/OrganizerDashboard';
-import ParticipantDashboard from '@/pages/ParticipantDashboard';
+import Dashboard from '@/pages/Dashboard';
 import CreateQuiz from '@/pages/CreateQuiz';
 import QuizExecution from '@/pages/QuizExecution';
 import Results from '@/pages/Results';
-import HomeRedirect from '@/components/HomeRedirect';
+
+function LegacyQuizRedirect({ to }: { to: (quizId: string) => string }) {
+    const { quizId } = useParams<{ quizId: string }>();
+    if (!quizId) return <Navigate to="/dashboard" replace />;
+    return <Navigate to={to(quizId)} replace />;
+}
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <HomeRedirect />,
+        element: <Dashboard />,
+    },
+    {
+        path: '/dashboard',
+        element: <Dashboard />,
     },
     {
         path: '/login',
@@ -23,56 +31,22 @@ export const router = createBrowserRouter([
         element: <Register />,
     },
 
-    // Organizer routes
+    // Organizer flow (registered users)
     {
-        path: '/organizer/dashboard',
-        element: (
-            // <Protected role="organizer">
-                <OrganizerDashboard />
-            // </Protected>
-        ),
+        path: '/quiz/new',
+        element: <CreateQuiz />,
     },
     {
-        path: '/organizer/create-quiz',
-        element: (
-            // <Protected role="organizer">
-                <CreateQuiz />
-            // </Protected>
-        ),
+        path: '/quiz/:quizId/edit',
+        element: <CreateQuiz />,
     },
     {
-        path: '/organizer/edit-quiz/:quizId',
-        element: (
-            // <Protected role="organizer">
-                <CreateQuiz />
-            // </Protected>
-        ),
+        path: '/quiz/:quizId/launch',
+        element: <CreateQuiz />,
     },
     {
-        path: '/organizer/launch-quiz/:quizId',
-        element: (
-            // <Protected role="organizer">
-                <CreateQuiz />
-            // </Protected>
-        ),
-    },
-    {
-        path: '/organizer/monitor-quiz/:quizId',
-        element: (
-            // <Protected role="organizer">
-                <Results />
-            // </Protected>
-        ),
-    },
-
-    // Participant routes
-    {
-        path: '/participant/dashboard',
-        element: (
-            // <Protected role="participant">
-                <ParticipantDashboard />
-            // </Protected>
-        ),
+        path: '/quiz/:quizId/monitor',
+        element: <Results />,
     },
 
     // Public
@@ -87,6 +61,32 @@ export const router = createBrowserRouter([
                 <Results />
             // </Protected>
         ),
+    },
+
+    // Legacy role-based routes
+    {
+        path: '/organizer/dashboard',
+        element: <Navigate to="/dashboard" replace />,
+    },
+    {
+        path: '/participant/dashboard',
+        element: <Navigate to="/dashboard" replace />,
+    },
+    {
+        path: '/organizer/create-quiz',
+        element: <Navigate to="/quiz/new" replace />,
+    },
+    {
+        path: '/organizer/edit-quiz/:quizId',
+        element: <LegacyQuizRedirect to={(id) => `/quiz/${id}/edit`} />,
+    },
+    {
+        path: '/organizer/launch-quiz/:quizId',
+        element: <LegacyQuizRedirect to={(id) => `/quiz/${id}/launch`} />,
+    },
+    {
+        path: '/organizer/monitor-quiz/:quizId',
+        element: <LegacyQuizRedirect to={(id) => `/quiz/${id}/monitor`} />,
     },
 
     {

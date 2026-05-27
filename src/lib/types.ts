@@ -1,9 +1,6 @@
-export type UserRole = 'organizer' | 'participant';
-
 export interface AuthUser {
     name: string;
     email: string;
-    role: UserRole;
 }
 
 export type QuizStatus = 'draft' | 'active' | 'completed';
