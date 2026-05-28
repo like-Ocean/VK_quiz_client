@@ -102,17 +102,17 @@ export default function QuizExecution() {
       <div className="w-full max-w-3xl">
         <div className="flex justify-between gap-3 mb-6">
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">Room Code</p>
+            <p className="text-sm text-muted-foreground">Код комнаты</p>
             <p className="font-mono">{roomCode}</p>
           </div>
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">Question</p>
+            <p className="text-sm text-muted-foreground">Вопрос</p>
             <p className="font-mono">
               {questionIndex + 1}/{total}
             </p>
           </div>
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">Score</p>
+            <p className="text-sm text-muted-foreground">Очки</p>
             <p className="font-mono">{score} pts</p>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function QuizExecution() {
                 </div>
                 {multipleChoice && (
                   <span className="text-sm text-muted-foreground">
-                    Multiple answers allowed
+                    Разрешено несколько ответов
                   </span>
                 )}
               </div>
@@ -186,7 +186,7 @@ export default function QuizExecution() {
                 disabled={selected.length === 0}
                 className="w-full"
               >
-                Submit Answer
+                Отправить ответ
               </Button>
             ) : (
               <div
@@ -206,7 +206,7 @@ export default function QuizExecution() {
 
         <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Users className="w-4 h-4" />
-          <span>12 participants online</span>
+          <span>12 участников онлайн</span>
         </div>
       </div>
     </div>

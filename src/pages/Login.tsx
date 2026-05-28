@@ -4,18 +4,30 @@ import { Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LabeledInput } from '@/components/LabeledInput';
-import { nameFromEmail, setUser } from '@/lib/auth';
+import { useLogin } from '@/hooks/useAuth';
 
 export default function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const loginMutation = useLogin();
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setError('');
         if (!email || !password) return;
-        setUser({ email, name: nameFromEmail(email) });
-        navigate('/dashboard');
+        loginMutation.mutate(
+            { email, password },
+            {
+                onSuccess: () => {
+                    navigate('/dashboard');
+                },
+                onError: () => {
+                    setError('Login failed. Check your credentials.');
+                },
+            },
+        );
     }
 
     return (
@@ -26,15 +38,15 @@ export default function Login() {
                         <Trophy className="w-8 h-8 text-primary-foreground" />
                     </div>
                     <CardTitle>
-                        <h2>Welcome to QuizMaster</h2>
+                        <h2>Дрбро пожаловать в VK Quiz</h2>
                     </CardTitle>
-                    <p className="text-muted-foreground mt-2">Sign in to continue</p>
+                    <p className="text-muted-foreground mt-2">Войдите, чтобы продолжить</p>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <LabeledInput
                             type="email"
-                            label="Email"
+                            label="Почта"
                             placeholder="you@example.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -42,21 +54,22 @@ export default function Login() {
                         />
                         <LabeledInput
                             type="password"
-                            label="Password"
+                            label="Пароль"
                             placeholder="Enter your password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
-                        <Button type="submit" className="w-full">
-                            Sign In
+                        <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+                            Войти
                         </Button>
+                        {error && <p className="text-sm text-destructive">{error}</p>}
                     </form>
 
                     <p className="text-sm text-muted-foreground text-center mt-4">
-                        Don't have an account?{' '}
+                        Нет аккаунта?{' '}
                         <Link to="/register" className="text-primary hover:underline">
-                            Register
+                            Зарегистрироваться
                         </Link>
                     </p>
 

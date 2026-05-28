@@ -35,8 +35,8 @@ export default function Results() {
     <div className="min-h-screen bg-background">
       <main className="max-w-4xl mx-auto px-4 py-10">
         <div className="text-center mb-8">
-          <h1>Quiz Results</h1>
-          <p className="text-muted-foreground mt-2">General Knowledge Quiz</p>
+          <h1>Результаты викторины</h1>
+          <p className="text-muted-foreground mt-2">Викторина по общим знаниям</p>
         </div>
 
         <Card className="mb-6 bg-gradient-to-r from-primary/5 to-chart-2/5">
@@ -45,27 +45,27 @@ export default function Results() {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-4">
                 <Trophy className="w-10 h-10 text-primary-foreground" />
               </div>
-              <h2>Congratulations!</h2>
+              <h2>Поздравляем!</h2>
               <p className="text-muted-foreground mt-2">
-                Quiz completed successfully
+                Викторина завершена успешно
               </p>
             </div>
 
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-background rounded-lg">
-                <p className="text-sm text-muted-foreground">Total Participants</p>
+                <p className="text-sm text-muted-foreground">Всего участников</p>
                 <p className="text-2xl mt-1">{totalParticipants}</p>
               </div>
               <div className="text-center p-4 bg-background rounded-lg">
-                <p className="text-sm text-muted-foreground">Questions</p>
+                <p className="text-sm text-muted-foreground">Вопросы</p>
                 <p className="text-2xl mt-1">{questions}</p>
               </div>
               <div className="text-center p-4 bg-background rounded-lg">
-                <p className="text-sm text-muted-foreground">Avg Score</p>
+                <p className="text-sm text-muted-foreground">Средний счет</p>
                 <p className="text-2xl mt-1">{avgScore}</p>
               </div>
               <div className="text-center p-4 bg-background rounded-lg">
-                <p className="text-sm text-muted-foreground">Completion Rate</p>
+                <p className="text-sm text-muted-foreground">Процент завершения</p>
                 <p className="text-2xl mt-1">{completionRate}%</p>
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function Results() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>
-              <h3>Leaderboard</h3>
+              <h3>Таблица лидеров</h3>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -119,9 +119,9 @@ export default function Results() {
         <div className="flex justify-center gap-4">
           <Button variant="outline" onClick={goDashboard}>
             <Home className="w-4 h-4" />
-            Back to Dashboard
+            Назад в панель управления
           </Button>
-          <Button onClick={() => navigate("/dashboard")}>Join Another Quiz</Button>
+          <Button onClick={() => navigate("/dashboard")}>Присоединиться к другой викторине</Button>
         </div>
       </main>
     </div>

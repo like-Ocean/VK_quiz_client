@@ -4,7 +4,7 @@ import { Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LabeledInput } from '@/components/LabeledInput';
-import { setUser } from '@/lib/auth';
+import { useRegister } from '@/hooks/useAuth';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  const registerMutation = useRegister();
 
   function handleSubmit(e: React.FormEvent) {
       e.preventDefault();
@@ -22,8 +23,17 @@ export default function Register() {
           setError('Passwords do not match');
           return;
       }
-      setUser({ name, email });
-      navigate('/dashboard');
+      registerMutation.mutate(
+        { username: name, email, password },
+        {
+          onSuccess: () => {
+            navigate('/dashboard');
+          },
+          onError: () => {
+            setError('Registration failed. Please try again.');
+          },
+        },
+      );
   }
 
   return (
@@ -34,14 +44,14 @@ export default function Register() {
               <Trophy className="w-8 h-8 text-primary-foreground" />
           </div>
           <CardTitle>
-              <h2>Create your account</h2>
+              <h2>Создать аккаунт</h2>
           </CardTitle>
-          <p className="text-muted-foreground mt-2">Join QuizMaster today</p>
+          <p className="text-muted-foreground mt-2">Присоединяйтесь к VK Quiz сегодня</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
               <LabeledInput
-                label="Full Name"
+                label="Имя пользователя"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -49,7 +59,7 @@ export default function Register() {
               />
               <LabeledInput
                 type="email"
-                label="Email"
+                label="Почта"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -57,31 +67,31 @@ export default function Register() {
               />
               <LabeledInput
                 type="password"
-                label="Password"
-                placeholder="Create a password"
+                label="Пароль"
+                placeholder="Введите пароль"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <LabeledInput
                 type="password"
-                label="Confirm Password"
-                placeholder="Repeat your password"
+                label="Подтвердить пароль"
+                placeholder="Повторите пароль"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
               />
               {error && <p className="text-sm text-destructive">{error}</p>}
 
-              <Button type="submit" className="w-full">
-                  Create Account
+                <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
+                  Создать аккаунт
               </Button>
           </form>
 
           <p className="text-sm text-muted-foreground text-center mt-4">
-            Already have an account?{' '}
+            Уже есть аккаунт?{' '}
             <Link to="/login" className="text-primary hover:underline">
-              Sign In
+              Войти
             </Link>
           </p>
         </CardContent>

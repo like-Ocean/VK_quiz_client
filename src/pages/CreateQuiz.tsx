@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Image as ImageIcon, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { LabeledInput } from "@/components/LabeledInput";
+import { QuestionCard } from "@/components/quiz/QuestionCard";
+import { QuestionsToolbar } from "@/components/quiz/QuestionsToolbar";
+import { QuizHeader } from "@/components/quiz/QuizHeader";
+import { QuizSettingsCard } from "@/components/quiz/QuizSettingsCard";
 import { categories } from "@/lib/mockData";
 import type { QuestionDraft } from "@/lib/types";
 
@@ -82,192 +82,42 @@ export default function CreateQuiz() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/dashboard")}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <Trophy className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <h1 className="text-lg">QuizMaster</h1>
-          </div>
-        </div>
-      </header>
+      <QuizHeader onBack={() => navigate("/dashboard")} />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2>{isEdit ? "Edit Quiz" : "Create New Quiz"}</h2>
           <p className="text-muted-foreground mt-1">
-            Build a quiz with questions and options
+            Создайте викторину, добавьте вопросы и делитесь с друзьями!
           </p>
         </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>
-              <h3>Quiz Settings</h3>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <LabeledInput
-              label="Quiz Title"
-              placeholder="My Awesome Quiz"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label>Category</label>
-                <select
-                  className="w-full px-3 py-2 bg-input-background border border-border rounded-lg h-9"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <LabeledInput
-                type="number"
-                label="Time Limit (seconds per question)"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(Number(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label>Description</label>
-              <textarea
-                className="w-full px-3 py-2 bg-input-background border border-border rounded-lg min-h-20"
-                placeholder="Optional description of the quiz"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <QuizSettingsCard
+          title={title}
+          onTitleChange={setTitle}
+          category={category}
+          categories={categories}
+          onCategoryChange={setCategory}
+          timeLimit={timeLimit}
+          onTimeLimitChange={setTimeLimit}
+          description={description}
+          onDescriptionChange={setDescription}
+        />
 
-        <div className="flex items-center justify-between mb-4">
-          <h3>Questions ({questions.length})</h3>
-          <Button onClick={addQuestion}>
-            <Plus className="w-4 h-4" />
-            Add Question
-          </Button>
-        </div>
+        <QuestionsToolbar count={questions.length} onAdd={addQuestion} />
 
         <div className="space-y-4">
           {questions.map((q, idx) => (
-            <Card key={q.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between mb-4">
-                  <h4>Question {idx + 1}</h4>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeQuestion(q.id)}
-                    disabled={questions.length === 1}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-
-                <div className="flex gap-6 mb-4">
-                  <label className="flex items-center gap-2 font-normal cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`type-${q.id}`}
-                      checked={q.type === "text"}
-                      onChange={() => updateQuestion(q.id, { type: "text" })}
-                    />
-                    <span>Text Question</span>
-                  </label>
-                  <label className="flex items-center gap-2 font-normal cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`type-${q.id}`}
-                      checked={q.type === "image"}
-                      onChange={() => updateQuestion(q.id, { type: "image" })}
-                    />
-                    <span>Image Question</span>
-                  </label>
-                </div>
-
-                {q.type === "image" && (
-                  <div className="p-4 border-2 border-dashed border-border rounded-lg text-center mb-4 cursor-pointer hover:bg-muted/40">
-                    <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Click to upload image or drag and drop
-                    </p>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <LabeledInput
-                    label="Question Text"
-                    placeholder="What is your question?"
-                    value={q.question}
-                    onChange={(e) =>
-                      updateQuestion(q.id, { question: e.target.value })
-                    }
-                  />
-
-                  <label className="flex items-center gap-2 font-normal cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={q.multipleChoice}
-                      onChange={(e) =>
-                        updateQuestion(q.id, {
-                          multipleChoice: e.target.checked,
-                          correctAnswers: e.target.checked
-                            ? q.correctAnswers
-                            : q.correctAnswers.slice(0, 1),
-                        })
-                      }
-                    />
-                    <span>Allow multiple correct answers</span>
-                  </label>
-
-                  <div className="space-y-2">
-                    <label>Options (mark correct)</label>
-                    {q.options.map((opt, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <input
-                          type={q.multipleChoice ? "checkbox" : "radio"}
-                          name={`correct-${q.id}`}
-                          checked={q.correctAnswers.includes(i)}
-                          onChange={() => toggleCorrect(q.id, i)}
-                        />
-                        <Input
-                          placeholder={`Option ${i + 1}`}
-                          value={opt}
-                          onChange={(e) => setOption(q.id, i, e.target.value)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <LabeledInput
-                    type="number"
-                    label="Points"
-                    value={q.points}
-                    onChange={(e) =>
-                      updateQuestion(q.id, {
-                        points: Number(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <QuestionCard
+              key={q.id}
+              question={q}
+              index={idx}
+              total={questions.length}
+              onRemove={removeQuestion}
+              onUpdate={updateQuestion}
+              onToggleCorrect={toggleCorrect}
+              onSetOption={setOption}
+            />
           ))}
         </div>
 
@@ -276,9 +126,9 @@ export default function CreateQuiz() {
             variant="outline"
             onClick={() => navigate("/dashboard")}
           >
-            Cancel
+            Отмена
           </Button>
-          <Button onClick={handleSave}>Save Quiz</Button>
+          <Button onClick={handleSave}>Сохранить викторину</Button>
         </div>
       </main>
     </div>
