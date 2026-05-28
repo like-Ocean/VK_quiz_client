@@ -1,4 +1,4 @@
-import type { AuthUser } from '@/lib/types';
+import type { AuthUser } from '@/types/user';
 
 const KEY = 'quizmaster_user';
 

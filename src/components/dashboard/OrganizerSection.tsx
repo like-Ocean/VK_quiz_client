@@ -1,7 +1,7 @@
 import { Clock, Play, Plus, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { QuizStatus, QuizSummary } from "@/lib/types";
+import type { QuizStatus, QuizSummary } from "@/types/quiz";
 
 const statusBadge: Record<QuizStatus, string> = {
   active: "bg-chart-2/20 text-chart-2",
@@ -105,13 +105,13 @@ export function OrganizerSection({
                           <Trophy className="w-4 h-4" /> {quiz.category}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" /> {quiz.questions} questions
+                          <Clock className="w-4 h-4" /> {quiz.questions} Вопросы
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" /> {quiz.timeLimit}s per question
+                          <Clock className="w-4 h-4" /> {quiz.timeLimit}с На вопрос
                         </span>
                         <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" /> {quiz.participants ?? 0} participants
+                          <Users className="w-4 h-4" /> {quiz.participants ?? 0} Участников
                         </span>
                       </div>
                     </div>

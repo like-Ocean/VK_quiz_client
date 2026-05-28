@@ -119,7 +119,7 @@ export default function Results() {
         <div className="flex justify-center gap-4">
           <Button variant="outline" onClick={goDashboard}>
             <Home className="w-4 h-4" />
-            Назад в панель управления
+            Назад
           </Button>
           <Button onClick={() => navigate("/dashboard")}>Присоединиться к другой викторине</Button>
         </div>

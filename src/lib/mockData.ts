@@ -1,4 +1,4 @@
-import type {ExecQuestion, LeaderboardEntry, ParticipationHistory, QuizSummary} from "./types";
+import type { ExecQuestion, LeaderboardEntry, ParticipationHistory, QuizSummary } from "@/types/quiz";
 
 export const organizerQuizzes: QuizSummary[] = [
   {

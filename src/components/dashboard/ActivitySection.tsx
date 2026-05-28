@@ -1,7 +1,7 @@
 import { Clock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { ParticipationHistory } from "@/lib/types";
+import type { ParticipationHistory } from "@/types/quiz";
 
 interface ActivitySectionProps {
   history: ParticipationHistory[];

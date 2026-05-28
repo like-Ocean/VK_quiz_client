@@ -6,7 +6,7 @@ import { QuestionsToolbar } from "@/components/quiz/QuestionsToolbar";
 import { QuizHeader } from "@/components/quiz/QuizHeader";
 import { QuizSettingsCard } from "@/components/quiz/QuizSettingsCard";
 import { categories } from "@/lib/mockData";
-import type { QuestionDraft } from "@/lib/types";
+import type { QuestionDraft } from "@/types/quiz";
 
 function makeQuestion(): QuestionDraft {
   return {

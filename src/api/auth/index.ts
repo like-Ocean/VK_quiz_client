@@ -1,5 +1,5 @@
 import { api, authApi } from "@/api/client";
-import type { LoginRequest, RefreshTokenRequest, RegisterRequest, TokenResponse } from "@/types/api";
+import type { LoginRequest, RefreshTokenRequest, RegisterRequest, TokenResponse } from "@/types/auth";
 
 export async function login(payload: LoginRequest) {
   const response = await authApi.post<TokenResponse>("/auth/login", payload);

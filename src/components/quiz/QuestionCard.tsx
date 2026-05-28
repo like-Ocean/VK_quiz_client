@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { LabeledInput } from "@/components/LabeledInput";
-import type { QuestionDraft } from "@/lib/types";
+import type { QuestionDraft } from "@/types/quiz";
 
 interface QuestionCardProps {
   question: QuestionDraft;

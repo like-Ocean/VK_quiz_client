@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { getAccessToken, hasRefreshToken } from "@/lib/tokenStore";
+import { getAccessToken, hasRefreshToken } from "@/store/tokenStore";
 import { useRefresh } from "@/hooks/useAuth";
 
 export function useAuthInit() {

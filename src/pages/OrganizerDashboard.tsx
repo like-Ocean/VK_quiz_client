@@ -5,7 +5,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { organizerQuizzes } from "@/lib/mockData";
-import type { QuizStatus } from "@/lib/types";
+import type { QuizStatus } from "@/types/quiz";
 
 const statusBadge: Record<QuizStatus, string> = {
   active: "bg-chart-2/20 text-chart-2",
