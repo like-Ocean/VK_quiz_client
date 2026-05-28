@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LabeledInput } from "@/components/LabeledInput";
+import type { CategoryResponse } from "@/types/category";
 
 interface QuizSettingsCardProps {
   title: string;
   onTitleChange: (value: string) => void;
-  category: string;
-  categories: string[];
+  categoryId: string;
+  categories: CategoryResponse[];
   onCategoryChange: (value: string) => void;
   timeLimit: number;
   onTimeLimitChange: (value: number) => void;
@@ -14,7 +15,7 @@ interface QuizSettingsCardProps {
 }
 
 export function QuizSettingsCard({
-  title, onTitleChange, category,
+  title, onTitleChange, categoryId,
   categories, onCategoryChange,
   timeLimit, onTimeLimitChange,
   description, onDescriptionChange,
@@ -28,33 +29,31 @@ export function QuizSettingsCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <LabeledInput
-          label="Название викторины"
+          label="Название"
           placeholder="Моя классная викторина"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
         />
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label>Категория</label>
-            <select
-              className="w-full px-3 py-2 bg-input-background border border-border rounded-lg h-9"
-              value={category}
-              onChange={(e) => onCategoryChange(e.target.value)}
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-          <LabeledInput
-            type="number"
-            label="Лимит времени (секунды на вопрос)"
-            value={timeLimit}
-            onChange={(e) => onTimeLimitChange(Number(e.target.value) || 0)}
-          />
+        <div className="space-y-2">
+          <label>Категория</label>
+          <select
+            className="w-full px-3 py-2 bg-input-background border border-border rounded-lg h-10"
+            value={categoryId}
+            onChange={(e) => onCategoryChange(e.target.value)}
+          >
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
+        <LabeledInput
+          type="number"
+          label="Лимит времени (секунды на вопрос)"
+          value={timeLimit}
+          onChange={(e) => onTimeLimitChange(Number(e.target.value) || 0)}
+        />
         <div className="space-y-2">
           <label>Описание</label>
           <textarea

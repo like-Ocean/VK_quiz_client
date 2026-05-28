@@ -13,26 +13,51 @@ interface QuestionCardProps {
   onUpdate: (id: string, patch: Partial<QuestionDraft>) => void;
   onToggleCorrect: (id: string, index: number) => void;
   onSetOption: (id: string, index: number, value: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
 }
 
 export function QuestionCard({
   question, index, total,
   onRemove, onUpdate,
   onToggleCorrect, onSetOption,
+  onMoveUp, onMoveDown,
 }: QuestionCardProps) {
   return (
     <Card>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between mb-4">
           <h4>Вопрос {index + 1}</h4>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onRemove(question.id)}
-            disabled={total === 1}
-          >
-            <Trash2 className="w-4 h-4 text-destructive" />
-          </Button>
+          <div className="flex gap-2">
+            {onMoveUp && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onMoveUp(question.id)}
+                disabled={index === 0}
+              >
+                Вверх
+              </Button>
+            )}
+            {onMoveDown && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onMoveDown(question.id)}
+                disabled={index === total - 1}
+              >
+                Вниз
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemove(question.id)}
+              disabled={total === 1}
+            >
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-6 mb-4">

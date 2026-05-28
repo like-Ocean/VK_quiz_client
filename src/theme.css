@@ -71,6 +71,9 @@
 @layer base {
   * {
     border-color: var(--border);
+    button {
+      cursor: pointer;
+    }
   }
 
   body {

@@ -72,11 +72,6 @@ export default function Login() {
                             Зарегистрироваться
                         </Link>
                     </p>
-
-                    <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-                        <p className="font-medium mb-1">Demo Account:</p>
-                        <p>demo@quiz.com</p>
-                    </div>
                 </CardContent>
             </Card>
         </div>

@@ -1,17 +1,15 @@
-import { createBrowserRouter, Navigate, useParams } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 // import { Protected } from '@/components/Protected';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
+import Profile from '@/pages/Profile';
 import CreateQuiz from '@/pages/CreateQuiz';
 import QuizExecution from '@/pages/QuizExecution';
 import Results from '@/pages/Results';
+import Quizzes from '@/pages/Quizzes';
+import QuizDetails from '@/pages/QuizDetails';
 
-function LegacyQuizRedirect({ to }: { to: (quizId: string) => string }) {
-    const { quizId } = useParams<{ quizId: string }>();
-    if (!quizId) return <Navigate to="/dashboard" replace />;
-    return <Navigate to={to(quizId)} replace />;
-}
 
 export const router = createBrowserRouter([
     {
@@ -29,6 +27,18 @@ export const router = createBrowserRouter([
     {
         path: '/register',
         element: <Register />,
+    },
+    {
+        path: '/profile',
+        element: <Profile />,
+    },
+    {
+        path: '/quizzes',
+        element: <Quizzes />,
+    },
+    {
+        path: '/quizzes/:quizId',
+        element: <QuizDetails />,
     },
 
     // Organizer flow (registered users)
@@ -61,32 +71,6 @@ export const router = createBrowserRouter([
                 <Results />
             // </Protected>
         ),
-    },
-
-    // Legacy role-based routes
-    {
-        path: '/organizer/dashboard',
-        element: <Navigate to="/dashboard" replace />,
-    },
-    {
-        path: '/participant/dashboard',
-        element: <Navigate to="/dashboard" replace />,
-    },
-    {
-        path: '/organizer/create-quiz',
-        element: <Navigate to="/quiz/new" replace />,
-    },
-    {
-        path: '/organizer/edit-quiz/:quizId',
-        element: <LegacyQuizRedirect to={(id) => `/quiz/${id}/edit`} />,
-    },
-    {
-        path: '/organizer/launch-quiz/:quizId',
-        element: <LegacyQuizRedirect to={(id) => `/quiz/${id}/launch`} />,
-    },
-    {
-        path: '/organizer/monitor-quiz/:quizId',
-        element: <LegacyQuizRedirect to={(id) => `/quiz/${id}/monitor`} />,
     },
 
     {

@@ -48,3 +48,80 @@ export interface LeaderboardEntry {
   questions: number;
   avgTime: number;
 }
+
+export interface QuizCreate {
+  title: string;
+  description?: string;
+  category_id?: string;
+  time_per_question: number;
+  is_public: boolean;
+}
+
+export interface QuizUpdate {
+  title?: string;
+  description?: string;
+  category_id?: string;
+  time_per_question?: number;
+  is_public?: boolean;
+}
+
+export interface QuizResponse {
+  id: string;
+  owner_id: string;
+  category_id?: string | null;
+  category_name: string;
+  title: string;
+  description?: string | null;
+  time_per_question: number;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AnswerType = "single" | "multiple";
+
+export interface AnswerOptionCreate {
+  text: string;
+  is_correct: boolean;
+}
+
+export interface QuestionCreate {
+  order: number;
+  text: string;
+  image_url?: string;
+  question_type: "text" | "image";
+  answer_type: AnswerType;
+  points: number;
+  answer_options: AnswerOptionCreate[];
+}
+
+export interface QuestionUpdate {
+  order?: number;
+  text?: string;
+  image_url?: string;
+  question_type?: "text" | "image";
+  answer_type?: AnswerType;
+  points?: number;
+  answer_options?: AnswerOptionCreate[];
+}
+
+export interface QuestionOptionResponse {
+  id: string;
+  text: string;
+  is_correct: boolean;
+}
+
+export interface QuestionResponse {
+  id: string;
+  order: number;
+  text: string;
+  image_url?: string | null;
+  question_type: "text" | "image";
+  answer_type: AnswerType;
+  points: number;
+  answer_options: QuestionOptionResponse[];
+}
+
+export interface QuestionReorderRequest {
+  order: string[];
+}
