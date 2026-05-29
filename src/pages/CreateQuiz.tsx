@@ -269,7 +269,7 @@ export default function CreateQuiz() {
             onClick={handleSave}
             disabled={createQuiz.isPending || updateQuiz.isPending}
           >
-            Сохранить викторину
+            Сохранить
           </Button>
         </div>
       </main>

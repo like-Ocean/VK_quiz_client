@@ -1,9 +1,12 @@
-import { Image as ImageIcon, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Image as ImageIcon, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { LabeledInput } from "@/components/LabeledInput";
+import { uploadImage } from "@/api/questions";
 import type { QuestionDraft } from "@/types/quiz";
+
 
 interface QuestionCardProps {
   question: QuestionDraft;
@@ -17,12 +20,33 @@ interface QuestionCardProps {
   onMoveDown?: (id: string) => void;
 }
 
+
 export function QuestionCard({
   question, index, total,
   onRemove, onUpdate,
   onToggleCorrect, onSetOption,
   onMoveUp, onMoveDown,
 }: QuestionCardProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      onUpdate(question.id, { imageUrl: url });
+    } catch {
+      alert("Ошибка загрузки изображения");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -82,11 +106,52 @@ export function QuestionCard({
         </div>
 
         {question.type === "image" && (
-          <div className="p-4 border-2 border-dashed border-border rounded-lg text-center mb-4 cursor-pointer hover:bg-muted/40">
-            <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              нажмите, чтобы загрузить изображение или перетащите его сюда
-            </p>
+          <div className="mb-4">
+            {question.imageUrl ? (
+              <div className="relative w-full">
+                <img
+                  src={question.imageUrl}
+                  alt="Изображение вопроса"
+                  className="w-full max-h-60 object-contain rounded-lg border border-border"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 bg-background/80"
+                  onClick={() => onUpdate(question.id, { imageUrl: undefined })}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="p-4 border-2 border-dashed border-border rounded-lg text-center cursor-pointer hover:bg-muted/40 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) {
+                    const fakeEvent = { target: { files: e.dataTransfer.files, value: "" } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                    handleFileChange(fakeEvent);
+                  }
+                }}
+              >
+                <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {uploading
+                    ? "Загрузка..."
+                    : "Нажмите или перетащите изображение сюда"}
+                </p>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
           </div>
         )}
 
@@ -137,7 +202,9 @@ export function QuestionCard({
             type="number"
             label="Баллы"
             value={question.points}
-            onChange={(e) => onUpdate(question.id, { points: Number(e.target.value) || 0 })}
+            onChange={(e) =>
+              onUpdate(question.id, { points: Number(e.target.value) || 0 })
+            }
           />
         </div>
       </CardContent>

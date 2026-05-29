@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createQuiz, deleteQuiz, fetchQuiz, fetchQuizzes, updateQuiz } from "@/api/quizzes";
-import type { QuizCreate, QuizUpdate } from "@/types/quiz";
+import type { QuizCreate, QuizFilters, QuizUpdate } from "@/types/quiz";
 
-export function useQuizzes() {
+export function useQuizzes(filters: QuizFilters = {}) {
   return useQuery({
-    queryKey: ["quizzes"],
-    queryFn: fetchQuizzes,
+    queryKey: ["quizzes", filters],
+    queryFn: () => fetchQuizzes(filters),
   });
 }
 

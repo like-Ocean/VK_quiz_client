@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { CategoryResponse } from "@/types/category";
+import { Plus } from "lucide-react";
 
 interface CategoryAdminPanelProps {
   categories: CategoryResponse[];
@@ -42,6 +43,7 @@ export function CategoryAdminPanel({
             onChange={(e) => setName(e.target.value)}
           />
           <Button type="submit" disabled={isCreating}>
+            <Plus className="w-4 h-4" />
             Добавить
           </Button>
         </form>

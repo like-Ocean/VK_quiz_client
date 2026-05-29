@@ -78,6 +78,22 @@ export interface QuizResponse {
   updated_at: string;
 }
 
+export interface QuizListResponse {
+  items: QuizResponse[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface QuizFilters {
+  search?: string;
+  category_id?: string;
+  owner_id?: string;
+  page?: number;
+  page_size?: number;
+}
+
 export type AnswerType = "single" | "multiple";
 
 export interface AnswerOptionCreate {

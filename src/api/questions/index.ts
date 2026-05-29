@@ -33,3 +33,13 @@ export async function reorderQuestions(quizId: string, payload: QuestionReorderR
     );
     return response.data;
 }
+
+export async function uploadImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<{ image_url: string }>('/uploads/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const backendBase = import.meta.env.PUBLIC_API_BASE_URL?.replace('/api', '') ?? 'http://localhost:8000';
+    return `${backendBase}${response.data.image_url}`;
+}

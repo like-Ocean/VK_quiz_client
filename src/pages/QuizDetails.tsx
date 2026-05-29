@@ -1,9 +1,11 @@
+// НЕ испольую, удалить 
 import { useNavigate, useParams } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuiz } from "@/hooks/useQuizzes";
 import { formatDate } from "@/helpers/formatDate";
+import { Pencil } from "lucide-react";
 
 export default function QuizDetails() {
   const navigate = useNavigate();
@@ -16,7 +18,10 @@ export default function QuizDetails() {
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={() => navigate("/quizzes")}>Назад</Button>
-          <Button onClick={() => navigate(`/quiz/${quizId}/edit`)}>Редактировать</Button>
+          <Button onClick={() => navigate(`/quiz/${quizId}/edit`)}>
+            <Pencil className="w-4 h-4 mr-2" />
+            Редактировать
+          </Button>
         </div>
 
         <Card>
