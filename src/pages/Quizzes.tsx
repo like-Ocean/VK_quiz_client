@@ -3,19 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { QuizFilters } from "@/components/quiz/QuizFilters";
 import { useQuizzes, useDeleteQuiz } from "@/hooks/useQuizzes";
 import { useMe } from "@/hooks/useMe";
-import { useCategories } from "@/hooks/useCategories";
+import { useCreateRoom } from "@/hooks/useRooms";
 import type { QuizResponse } from "@/types/quiz";
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { 
+  Plus, Play, Radio, BarChart2, Pencil, Trash2,
+  ChevronLeft, ChevronRight, Tag,
+  HelpCircle, Clock, Users } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
-
 
 export default function Quizzes() {
   const navigate = useNavigate();
   const { data: me } = useMe();
-  const { data: categories } = useCategories();
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -50,7 +51,6 @@ export default function Quizzes() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2>Список квизов</h2>
-            <p className="text-muted-foreground mt-1">Публичные и ваши викторины</p>
           </div>
           <Button onClick={() => navigate("/quiz/new")}>
             <Plus className="w-4 h-4" />
@@ -58,40 +58,16 @@ export default function Quizzes() {
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-6">
-          <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              className="pl-9 h-10"
-              placeholder="Поиск по названию..."
-              value={search}
-              onChange={(e) => handleFilterChange(() => setSearch(e.target.value))}
-            />
-          </div>
-
-          <select
-            className="px-3 py-2 bg-input-background border border-border rounded-lg h-10 text-sm"
-            value={categoryFilter}
-            onChange={(e) => handleFilterChange(() => setCategoryFilter(e.target.value))}
-          >
-            <option value="">Все категории</option>
-            {(categories ?? []).map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          {me && (
-            <label className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg h-10 cursor-pointer text-sm">
-              <input
-                type="checkbox"
-                checked={onlyMine}
-                onChange={(e) => handleFilterChange(() => setOnlyMine(e.target.checked))}
-              />
-              Только мои
-            </label>
-          )}
+        <div className="mb-6">
+          <QuizFilters
+            search={search}
+            onSearchChange={(v) => handleFilterChange(() => setSearch(v))}
+            categoryFilter={categoryFilter}
+            onCategoryChange={(v) => handleFilterChange(() => setCategoryFilter(v))}
+            onlyMine={onlyMine}
+            onOnlyMineChange={(v) => handleFilterChange(() => setOnlyMine(v))}
+            showOnlyMine={Boolean(me)}
+          />
         </div>
 
         {isLoading && (
@@ -150,9 +126,10 @@ export default function Quizzes() {
   );
 }
 
-
-function QuizRow({quiz, isOwner, onEdit} : {quiz: QuizResponse; isOwner: boolean; onEdit: () => void;}) {
+function QuizRow({ quiz, isOwner, onEdit}: {quiz: QuizResponse;isOwner: boolean;onEdit: () => void;}) {
+  const navigate = useNavigate();
   const deleteQuiz = useDeleteQuiz();
+  const createRoom = useCreateRoom();
 
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
@@ -161,6 +138,17 @@ function QuizRow({quiz, isOwner, onEdit} : {quiz: QuizResponse; isOwner: boolean
     }
   }
 
+  function handleLaunch(e: React.MouseEvent) {
+    e.stopPropagation();
+    createRoom.mutate(
+      { quiz_id: quiz.id },
+      { onSuccess: (room) => navigate(`/room/${room.id}/lobby`) },
+    );
+  }
+
+  const activeRoomId = quiz.active_room_id;
+  const quizStatus = quiz.room_status;
+
   return (
     <Card
       className={`transition-shadow ${isOwner ? "hover:shadow-md cursor-pointer" : ""}`}
@@ -168,29 +156,98 @@ function QuizRow({quiz, isOwner, onEdit} : {quiz: QuizResponse; isOwner: boolean
     >
       <CardContent className="pt-6 flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+
+          {/* Заголовок + бейджи */}
+          <div className="flex items-center gap-2 flex-wrap mb-1">
             <h3 className="truncate">{quiz.title}</h3>
             {isOwner && (
               <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full shrink-0">
                 Вы создатель
               </span>
             )}
+            {quizStatus === "active" && (
+              <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full shrink-0 animate-pulse">
+                В эфире
+              </span>
+            )}
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            {quiz.description ?? "Без описания"}
-          </p>
-          {quiz.category_name && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Категория: {quiz.category_name}
+
+          {/* Описание */}
+          {quiz.description && (
+            <p className="text-sm text-muted-foreground mb-2">
+              {quiz.description}
             </p>
           )}
+
+          {/* Метаданные */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            {quiz.category_name && (
+              <span className="flex items-center gap-1">
+                <Tag className="w-3 h-3" />
+                {quiz.category_name}
+              </span>
+            )}
+            {quiz.questions_count != null && (
+              <span className="flex items-center gap-1">
+                <HelpCircle className="w-3 h-3" />
+                {quiz.questions_count} вопр.
+              </span>
+            )}
+            {quiz.time_per_question != null && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {quiz.time_per_question} сек.
+              </span>
+            )}
+            {quizStatus === "active" && quiz.participants_count != null && (
+              <span className="flex items-center gap-1 text-green-600 font-medium">
+                <Users className="w-3 h-3" />
+                {quiz.participants_count} участн.
+              </span>
+            )}
+          </div>
+
         </div>
 
         {isOwner && (
           <div className="flex items-center gap-2 shrink-0">
+            {!quizStatus || quizStatus === "finished" ? (
+              <>
+                {quizStatus === "finished" && activeRoomId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    title="Результаты"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/results/${activeRoomId}`); }}
+                  >
+                    <BarChart2 className="w-4 h-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  title="Запустить"
+                  onClick={handleLaunch}
+                  disabled={createRoom.isPending}
+                >
+                  <Play className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                title={quizStatus === "waiting" ? "Лобби" : "Наблюдение"}
+                onClick={(e) => { e.stopPropagation(); navigate(`/room/${activeRoomId}/lobby`); }}
+              >
+                <Radio className="w-4 h-4" />
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
+              title="Редактировать"
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
             >
               <Pencil className="w-4 h-4" />
@@ -198,6 +255,7 @@ function QuizRow({quiz, isOwner, onEdit} : {quiz: QuizResponse; isOwner: boolean
             <Button
               variant="outline"
               size="sm"
+              title="Удалить"
               onClick={handleDelete}
               disabled={deleteQuiz.isPending}
               className="text-destructive hover:text-destructive hover:border-destructive"

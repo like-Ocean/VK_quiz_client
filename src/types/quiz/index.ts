@@ -76,6 +76,10 @@ export interface QuizResponse {
   is_public: boolean;
   created_at: string;
   updated_at: string;
+  active_room_id?: string;
+  questions_count?: number;
+  participants_count?: number;
+  room_status?: "waiting" | "active" | "finished";
 }
 
 export interface QuizListResponse {

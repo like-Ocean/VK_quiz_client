@@ -38,3 +38,16 @@ export function hasRefreshToken() {
 export function hasAccessToken() {
   return Boolean(getAccessToken());
 }
+
+
+export function setGuestToken(token: string) {
+  localStorage.setItem("guest_token", token);
+}
+
+export function getGuestToken(): string | null {
+  return localStorage.getItem("guest_token");
+}
+
+export function clearGuestToken() {
+  localStorage.removeItem("guest_token");
+}

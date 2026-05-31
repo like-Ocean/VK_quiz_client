@@ -43,9 +43,9 @@ export function AppHeader({ subtitle, showLogout = true }: AppHeaderProps) {
             <span className="text-sm text-muted-foreground hidden sm:inline">
               Добро пожаловать, {user.username}
             </span>
-               <Button variant="ghost" size="lg" onClick={() => navigate("/quizzes")}>
-                Квизы
-               </Button>
+              <Button variant="ghost" size="lg" onClick={() => navigate("/quizzes")}>
+              Квизы
+              </Button>
             <Button variant="ghost" className="cursor-pointer" size="lg" onClick={() => navigate("/profile")}>
               Профиль
             </Button>
