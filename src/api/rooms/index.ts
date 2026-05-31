@@ -7,8 +7,9 @@ import type {
 } from '@/types/room';
 
 export async function createRoom(payload: RoomCreate): Promise<RoomResponse> {
-    const res = await api.post<RoomResponse>('/rooms', payload);
-    return res.data;
+  const res = await api.post<RoomResponse>('/rooms', payload);
+  console.log("createRoom response:", res.data);
+  return res.data;
 }
 
 export async function joinRoom(payload: RoomJoin): Promise<RoomJoinResponse> {
@@ -33,4 +34,9 @@ export async function kickParticipant(roomId: string, payload: KickRequest): Pro
 export async function fetchResults(roomId: string): Promise<LeaderboardEntry[]> {
     const res = await api.get<LeaderboardEntry[]>(`/rooms/${roomId}/results`);
     return res.data;
+}
+
+export async function fetchRoomByJoinCode(joinCode: string): Promise<RoomResponse> {
+  const { data } = await api.get<RoomResponse>(`/rooms/by-code/${joinCode}`);
+  return data;
 }

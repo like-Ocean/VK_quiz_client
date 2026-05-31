@@ -31,7 +31,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <AppHeader subtitle="Главная" />
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <JoinQuizCard onJoin={(code) => navigate(`/quiz/${code}`)} />
+        <JoinQuizCard onJoin={(code) => navigate(code ? `/join/${code}` : `/join`)} />
 
         {!user && (
           <OrganizerCtaCard

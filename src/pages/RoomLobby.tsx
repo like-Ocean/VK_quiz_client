@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { useRoom, useParticipants, useKick } from "@/hooks/useRooms";
 import { useQuiz } from "@/hooks/useQuizzes";
 import { useMe } from "@/hooks/useMe";
+import { useRoomSocketContext } from "@/context/RoomSocketContext";
 import { Copy, Play, UserX } from "lucide-react";
 import type { KickRequest } from "@/types/room";
 
@@ -13,18 +15,36 @@ export default function RoomLobby() {
   const { data: me } = useMe();
   const { data: room, isLoading: roomLoading } = useRoom(roomId);
   const { data: quiz } = useQuiz(room?.quiz_id);
-  const { data: participants } = useParticipants(roomId);
-  const kick = useKick(roomId!);
+  const kick = useKick(roomId ?? "");
+  
+
+  const { roomState, startQuiz } = useRoomSocketContext();
+
+  const { data: participants = [] } = useParticipants(roomId, {
+    refetchInterval: roomState.phase === "waiting" ? 2000 : false,
+  });
+  const visibleParticipants = participants.filter((p) => p.user_id !== room?.owner_id);
+
+  useEffect(() => {
+    if (roomState.phase === "question") navigate(`/room/${roomId}/play`);
+    if (roomState.phase === "kicked") navigate("/dashboard");
+  }, [roomState.phase, navigate, roomId]);
 
   const isOwner = room && me && room.owner_id === me.id;
-  const count = participants?.length ?? 0;
+  const count = visibleParticipants.length;
 
-  function handleCopy() {
-    navigator.clipboard.writeText(room?.join_code ?? "");
-  }
-
-  function handleKick(payload: KickRequest) {
-    kick.mutate(payload);
+  async function handleCopy() {
+    const joinCode = room?.join_code ?? "";
+    try {
+      await navigator.clipboard.writeText(joinCode);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = joinCode;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
   }
 
   if (roomLoading) {
@@ -47,14 +67,10 @@ export default function RoomLobby() {
     <div className="min-h-screen bg-background">
       <AppHeader subtitle="Лобби" />
       <main className="max-w-5xl mx-auto px-4 py-8">
-
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold">
-            {quiz?.title ?? "Загрузка..."}
-          </h2>
+          <h2 className="text-2xl font-semibold">{quiz?.title ?? "Загрузка..."}</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            {quiz ? `${quiz.questions_count ?? "—"} вопросов` : ""}
-            {quiz ? " · " : ""}
+            {quiz ? `${quiz.questions_count ?? "—"} вопросов · ` : ""}
             Ожидание участников
           </p>
         </div>
@@ -74,24 +90,18 @@ export default function RoomLobby() {
               </Button>
             </div>
 
-            {isOwner && (
+            {isOwner ? (
               <Button
                 size="lg"
                 className="w-full gap-2 mt-auto"
                 disabled={count < 1}
-                onClick={() => navigate(`/room/${roomId}/play`)}
+                onClick={startQuiz}
               >
                 <Play className="w-5 h-5" />
-                Начать квиз · {count}{" "}
-                {count === 1
-                  ? "участник"
-                  : count < 5
-                  ? "участника"
-                  : "участников"}
+                Начать · {count}{" "}
+                {count === 1 ? "участник" : count < 5 ? "участника" : "участников"}
               </Button>
-            )}
-
-            {!isOwner && (
+            ) : (
               <div className="rounded-xl border border-border bg-card p-4 text-center text-sm text-muted-foreground">
                 Ожидайте, пока хозяин начнёт игру...
               </div>
@@ -100,12 +110,8 @@ export default function RoomLobby() {
 
           <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold flex items-center gap-2">
-                Участники
-              </h3>
-              <span className="text-muted-foreground font-mono text-sm">
-                {count}
-              </span>
+              <h3 className="font-semibold">Участники</h3>
+              <span className="text-muted-foreground font-mono text-sm">{count}</span>
             </div>
 
             {count === 0 ? (
@@ -114,7 +120,7 @@ export default function RoomLobby() {
               </p>
             ) : (
               <ul className="space-y-2">
-                {participants!.map((p) => (
+                {visibleParticipants.map((p) => (
                   <li
                     key={p.id}
                     className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 py-2"
@@ -125,13 +131,12 @@ export default function RoomLobby() {
                       </div>
                       <span className="text-sm">{p.display_name}</span>
                     </div>
-
                     {isOwner && p.user_id !== me?.id && (
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:text-destructive shrink-0"
-                        onClick={() => handleKick({ participant_id: p.id })}
+                        onClick={() => kick.mutate({ participant_id: p.id } satisfies KickRequest)}
                         disabled={kick.isPending}
                       >
                         <UserX className="w-4 h-4" />

@@ -9,7 +9,7 @@ export function QuizHeader({ onBack }: QuizHeaderProps) {
   return (
     <header className="bg-card border-b border-border">
       <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={onBack}>
+        <Button variant="ghost" size="lg" onClick={onBack}>
           <ArrowLeft className="w-4 h-4" />
           Назад к дашборду
         </Button>

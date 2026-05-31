@@ -1,134 +1,141 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { execQuestions } from "@/lib/mockData";
+import { useRoomSocketContext } from "@/context/RoomSocketContext";  
+import type { WsAnswerOption, QuestionState, QuestionAction } from "@/types/room";
+import { useMe } from "@/hooks/useMe";
+import { useRoom } from "@/hooks/useRooms";
 
-const QUESTION_TIME = 30;
 
-function arraysEqualUnordered(a: number[], b: number[]) {
-  if (a.length !== b.length) return false;
-  const sortedA = [...a].sort();
-  const sortedB = [...b].sort();
-  return sortedA.every((v, i) => v === sortedB[i]);
+function questionReducer(state: QuestionState, action: QuestionAction): QuestionState {
+  switch (action.type) {
+    case "INIT":
+      return { questionId: action.questionId, selected: [], submitted: false, timeLeft: action.timeLimit };
+    case "SELECT": {
+      if (state.submitted) return state;
+      const next = action.multiple
+        ? state.selected.includes(action.optionId)
+          ? state.selected.filter((x) => x !== action.optionId)
+          : [...state.selected, action.optionId]
+        : [action.optionId];
+      return { ...state, selected: next };
+    }
+    case "SUBMIT":
+      return { ...state, submitted: true };
+    case "TICK":
+      return { ...state, timeLeft: Math.max(0, state.timeLeft - 1) };
+    default:
+      return state;
+  }
 }
 
 export default function QuizExecution() {
-  const { roomCode = "ABC123" } = useParams<{ roomCode: string }>();
+  // const { joinCode = "" } = useParams<{ joinCode: string }>();
+  const { roomId = "" } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
+  const { data: me } = useMe();
+  const { data: room } = useRoom(roomId);
 
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [selected, setSelected] = useState<number[]>([]);
-  const [submitted, setSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
-
-  const current = execQuestions[questionIndex];
-  const total = execQuestions.length;
-  const multipleChoice = current?.multipleChoice ?? false;
-
-  const isCorrect = useMemo(
-    () =>
-      submitted &&
-      current &&
-      arraysEqualUnordered(selected, current.correctAnswers),
-    [submitted, selected, current],
-  );
-
-  // Таймер
   useEffect(() => {
-    if (submitted) return;
-    if (timeLeft <= 0) {
-      setSubmitted(true);
-      return;
+    if (room && me && room.owner_id === me.id) {
+      navigate(`/room/${roomId}/lobby`, { replace: true });
     }
-    const id = window.setTimeout(() => setTimeLeft((t) => t - 1), 1000);
-    return () => window.clearTimeout(id);
-  }, [timeLeft, submitted]);
+  }, [room, me, roomId, navigate]);
 
-  // Переход к следующему вопросу или результатам
+  const { roomState, submitAnswer } = useRoomSocketContext();
+  const { phase, currentQuestion, correctOptionIds, participantCount } = roomState;
+
+  const [qState, dispatch] = useReducer(questionReducer, {
+    questionId: null,
+    selected: [],
+    submitted: false,
+    timeLeft: 0,
+  });
+
+  const multipleChoice = currentQuestion?.answer_type === "multiple";
+  const timeLimit = currentQuestion?.time_limit ?? 30;
+
   useEffect(() => {
-    if (!submitted) return;
-    const id = window.setTimeout(() => {
-      if (questionIndex + 1 >= total) {
-        navigate(`/results/exec-${roomCode}`);
-      } else {
-        setQuestionIndex((i) => i + 1);
-        setSelected([]);
-        setSubmitted(false);
-        setTimeLeft(QUESTION_TIME);
-      }
-    }, 2000);
-    return () => window.clearTimeout(id);
-  }, [submitted, questionIndex, total, navigate, roomCode]);
-
-  function handleSelect(i: number) {
-    if (submitted) return;
-    if (multipleChoice) {
-      setSelected((prev) =>
-        prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i],
-      );
-    } else {
-      setSelected([i]);
+    if (phase === "question" && currentQuestion && currentQuestion.question_id !== qState.questionId) {
+      dispatch({ type: "INIT", questionId: currentQuestion.question_id, timeLimit: currentQuestion.time_limit });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, currentQuestion?.question_id]);
+
+  useEffect(() => {
+    if (phase !== "question" || qState.submitted || qState.timeLeft <= 0) return;
+    const id = window.setTimeout(() => dispatch({ type: "TICK" }), 1000);
+    return () => clearTimeout(id);
+  }, [qState.timeLeft, qState.submitted, phase]);
+
+  useEffect(() => {
+    if (phase === "question" && !qState.submitted && qState.timeLeft === 0 && currentQuestion?.question_id === qState.questionId) {
+      dispatch({ type: "SUBMIT" });
+      submitAnswer(currentQuestion.question_id, qState.selected);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qState.timeLeft]);
+
+  useEffect(() => {
+    if (phase === "finished") navigate(`/results/${roomId}`);
+    if (phase === "kicked") navigate("/dashboard");
+  }, [phase, navigate, roomId]);
+
+  function handleSelect(optionId: string) {
+    dispatch({ type: "SELECT", optionId, multiple: multipleChoice ?? false });
   }
 
   function handleSubmit() {
-    if (submitted || !current) return;
-    setSubmitted(true);
-    if (arraysEqualUnordered(selected, current.correctAnswers)) {
-      setScore((s) => s + 10);
-    }
+    if (qState.submitted || !currentQuestion) return;
+    dispatch({ type: "SUBMIT" });
+    submitAnswer(currentQuestion.question_id, qState.selected);
   }
 
-  if (!current) return null;
-
-  function getOptionClass(i: number) {
-    const isSelected = selected.includes(i);
-    if (!submitted) {
-      return isSelected
-        ? "border-primary bg-primary/10"
-        : "border-border hover:bg-accent";
+  function getOptionClass(option: WsAnswerOption) {
+    const isSelected = qState.selected.includes(option.id);
+    if (!qState.submitted) {
+      return isSelected ? "border-primary bg-primary/10" : "border-border hover:bg-accent";
     }
-    const isRight = current!.correctAnswers.includes(i);
-    if (isRight) return "border-chart-2 bg-chart-2/20";
+    const isCorrect = correctOptionIds.includes(option.id);
+    if (isCorrect) return "border-green-500 bg-green-500/20";
     if (isSelected) return "border-destructive bg-destructive/10";
     return "border-border";
+  }
+
+  if (phase === "waiting" || !currentQuestion) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Ожидание вопроса...</p>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
+
         <div className="flex justify-between gap-3 mb-6">
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
             <p className="text-sm text-muted-foreground">Код комнаты</p>
-            <p className="font-mono">{roomCode}</p>
+            <p className="font-mono">{room?.join_code}</p>
           </div>
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
             <p className="text-sm text-muted-foreground">Вопрос</p>
-            <p className="font-mono">
-              {questionIndex + 1}/{total}
-            </p>
-          </div>
-          <div className="px-4 py-2 bg-card rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">Очки</p>
-            <p className="font-mono">{score} pts</p>
+            <p className="font-mono">{currentQuestion.index}/{currentQuestion.total}</p>
           </div>
         </div>
 
         <Card>
           <CardContent className="pt-6">
+
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-muted-foreground" />
-                  <span
-                    className={`text-xl ${
-                      timeLeft <= 5 ? "text-destructive" : "text-foreground"
-                    }`}
-                  >
-                    {timeLeft}s
+                  <span className={`text-xl ${qState.timeLeft <= 5 ? "text-destructive" : "text-foreground"}`}>
+                    {qState.timeLeft}s
                   </span>
                 </div>
                 {multipleChoice && (
@@ -139,66 +146,56 @@ export default function QuizExecution() {
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all ${
-                    timeLeft <= 5 ? "bg-destructive" : "bg-primary"
-                  }`}
-                  style={{ width: `${(timeLeft / QUESTION_TIME) * 100}%` }}
+                  className={`h-full transition-all duration-1000 ${qState.timeLeft <= 5 ? "bg-destructive" : "bg-primary"}`}
+                  style={{ width: `${(qState.timeLeft / timeLimit) * 100}%` }}
                 />
               </div>
             </div>
 
-            <h2 className="mb-6">{current.question}</h2>
+            {currentQuestion.image_url && (
+              <img
+                src={currentQuestion.image_url}
+                alt="Question image"
+                className="w-full max-h-60 object-contain rounded-lg mb-4"
+              />
+            )}
+
+            <h2 className="mb-6">{currentQuestion.text}</h2>
 
             <div className="space-y-3 mb-6">
-              {current.options.map((option, i) => {
-                const isSelected = selected.includes(i);
+              {currentQuestion.options.map((option) => {
+                const isSelected = qState.selected.includes(option.id);
                 return (
                   <button
-                    key={i}
-                    onClick={() => handleSelect(i)}
-                    disabled={submitted}
-                    className={`w-full p-4 rounded-lg border-2 text-left transition-all ${getOptionClass(i)}`}
+                    key={option.id}
+                    onClick={() => handleSelect(option.id)}
+                    disabled={qState.submitted}
+                    className={`w-full p-4 rounded-lg border-2 text-left transition-all ${getOptionClass(option)}`}
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-6 h-6 ${multipleChoice ? "rounded" : "rounded-full"} border-2 flex items-center justify-center ${
-                          isSelected
-                            ? "border-primary bg-primary"
-                            : "border-border"
+                        className={`w-6 h-6 ${multipleChoice ? "rounded" : "rounded-full"} border-2 flex items-center justify-center shrink-0 ${
+                          isSelected ? "border-primary bg-primary" : "border-border"
                         }`}
                       >
                         {isSelected && (
-                          <div
-                            className={`w-3 h-3 bg-primary-foreground ${multipleChoice ? "rounded-sm" : "rounded-full"}`}
-                          />
+                          <div className={`w-3 h-3 bg-primary-foreground ${multipleChoice ? "rounded-sm" : "rounded-full"}`} />
                         )}
                       </div>
-                      <span>{option}</span>
+                      <span>{option.text}</span>
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            {!submitted ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={selected.length === 0}
-                className="w-full"
-              >
+            {!qState.submitted ? (
+              <Button onClick={handleSubmit} disabled={qState.selected.length === 0} className="w-full">
                 Отправить ответ
               </Button>
             ) : (
-              <div
-                className={`p-4 rounded-lg ${
-                  isCorrect
-                    ? "bg-chart-2/20 text-chart-2"
-                    : "bg-destructive/10 text-destructive"
-                }`}
-              >
-                {isCorrect
-                  ? "Correct! Moving to next question..."
-                  : "Incorrect. The correct answer is highlighted."}
+              <div className="p-4 rounded-lg text-sm bg-muted text-muted-foreground">
+                {phase === "question_end" ? "Ждём следующий вопрос..." : "Ответ отправлен, ждём остальных..."}
               </div>
             )}
           </CardContent>
@@ -206,7 +203,7 @@ export default function QuizExecution() {
 
         <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Users className="w-4 h-4" />
-          <span>12 участников онлайн</span>
+          <span>{participantCount} участников онлайн</span>
         </div>
       </div>
     </div>

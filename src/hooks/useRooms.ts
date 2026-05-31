@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createRoom, fetchParticipants,
   fetchResults, fetchRoom,
+  fetchRoomByJoinCode,
   joinRoom, kickParticipant,
 } from "@/api/rooms";
 import type { KickRequest, RoomCreate, RoomJoin } from "@/types/room";
@@ -14,12 +15,15 @@ export function useRoom(roomId?: string) {
   });
 }
 
-export function useParticipants(roomId?: string) {
+export function useParticipants(
+  roomId?: string,
+  options?: { refetchInterval?: number | false },
+) {
   return useQuery({
     queryKey: ["rooms", roomId, "participants"],
     queryFn: () => fetchParticipants(roomId as string),
     enabled: Boolean(roomId),
-    refetchInterval: 3000,
+    refetchInterval: options?.refetchInterval,
   });
 }
 
@@ -56,5 +60,13 @@ export function useKick(roomId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms", roomId, "participants"] });
     },
+  });
+}
+
+export function useRoomByJoinCode(joinCode?: string) {
+  return useQuery({
+    queryKey: ["room", "by-code", joinCode],
+    queryFn: () => fetchRoomByJoinCode(joinCode!),
+    enabled: !!joinCode,
   });
 }
