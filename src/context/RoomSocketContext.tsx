@@ -14,8 +14,8 @@ interface RoomSocketContextValue {
 
 const RoomSocketContext = createContext<RoomSocketContextValue | null>(null);
 
-export function RoomSocketProvider({ joinCode, children }: { joinCode: string; children: ReactNode }) {
-  const socket = useRoomSocket(joinCode);
+export function RoomSocketProvider({ roomId, children }: { roomId: string; children: ReactNode }) {
+  const socket = useRoomSocket(roomId);
   return <RoomSocketContext.Provider value={socket}>{children}</RoomSocketContext.Provider>;
 }
 

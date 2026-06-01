@@ -38,15 +38,11 @@ export default function QuizExecution() {
   const { data: me } = useMe();
   const { data: room } = useRoom(roomId);
 
-  useEffect(() => {
-    if (room && me && room.owner_id === me.id) {
-      navigate(`/room/${roomId}/lobby`, { replace: true });
-    }
-  }, [room, me, roomId, navigate]);
 
   const { roomState, submitAnswer } = useRoomSocketContext();
   const { phase, currentQuestion, correctOptionIds, participantCount } = roomState;
-
+  const isOwner = room && me && room.owner_id === me.id;
+  
   const [qState, dispatch] = useReducer(questionReducer, {
     questionId: null,
     selected: [],
@@ -59,36 +55,49 @@ export default function QuizExecution() {
 
   useEffect(() => {
     if (phase === "question" && currentQuestion && currentQuestion.question_id !== qState.questionId) {
-      dispatch({ type: "INIT", questionId: currentQuestion.question_id, timeLimit: currentQuestion.time_limit });
+      dispatch({ 
+        type: "INIT", 
+        questionId: currentQuestion.question_id, 
+        timeLimit: currentQuestion.time_limit 
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentQuestion?.question_id]);
+  }, [currentQuestion?.question_id]);
 
-  useEffect(() => {
-    if (phase !== "question" || qState.submitted || qState.timeLeft <= 0) return;
-    const id = window.setTimeout(() => dispatch({ type: "TICK" }), 1000);
-    return () => clearTimeout(id);
-  }, [qState.timeLeft, qState.submitted, phase]);
+    useEffect(() => {
+      if (phase !== "question" || qState.timeLeft <= 0) return;
+      const id = window.setTimeout(() => dispatch({ type: "TICK" }), 1000);
+      return () => clearTimeout(id);
+    }, [phase, qState.timeLeft]); 
 
   useEffect(() => {
     if (phase === "question" && !qState.submitted && qState.timeLeft === 0 && currentQuestion?.question_id === qState.questionId) {
-      dispatch({ type: "SUBMIT" });
-      submitAnswer(currentQuestion.question_id, qState.selected);
+      if (!isOwner) {
+        dispatch({ type: "SUBMIT" });
+        submitAnswer(currentQuestion.question_id, qState.selected);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qState.timeLeft]);
 
   useEffect(() => {
-    if (phase === "finished") navigate(`/results/${roomId}`);
+    const isLastQuestion =
+      currentQuestion && currentQuestion.index + 1 >= currentQuestion.total;
+
+    if (phase === "finished" || (phase === "question_end" && isLastQuestion)) {
+      navigate(`/results/${roomId}`, {
+        state: { leaderboard: roomState.leaderboard },
+      });
+    }
     if (phase === "kicked") navigate("/dashboard");
-  }, [phase, navigate, roomId]);
+  }, [phase, currentQuestion, navigate, roomId, roomState.leaderboard]);
 
   function handleSelect(optionId: string) {
     dispatch({ type: "SELECT", optionId, multiple: multipleChoice ?? false });
   }
 
   function handleSubmit() {
-    if (qState.submitted || !currentQuestion) return;
+    if (qState.submitted || !currentQuestion || isOwner) return;
     dispatch({ type: "SUBMIT" });
     submitAnswer(currentQuestion.question_id, qState.selected);
   }
@@ -115,7 +124,6 @@ export default function QuizExecution() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
-
         <div className="flex justify-between gap-3 mb-6">
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
             <p className="text-sm text-muted-foreground">Код комнаты</p>
@@ -129,7 +137,6 @@ export default function QuizExecution() {
 
         <Card>
           <CardContent className="pt-6">
-
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -169,7 +176,7 @@ export default function QuizExecution() {
                   <button
                     key={option.id}
                     onClick={() => handleSelect(option.id)}
-                    disabled={qState.submitted}
+                    disabled={qState.submitted || !!isOwner}
                     className={`w-full p-4 rounded-lg border-2 text-left transition-all ${getOptionClass(option)}`}
                   >
                     <div className="flex items-center gap-3">
@@ -189,13 +196,23 @@ export default function QuizExecution() {
               })}
             </div>
 
-            {!qState.submitted ? (
-              <Button onClick={handleSubmit} disabled={qState.selected.length === 0} className="w-full">
-                Отправить ответ
-              </Button>
-            ) : (
-              <div className="p-4 rounded-lg text-sm bg-muted text-muted-foreground">
-                {phase === "question_end" ? "Ждём следующий вопрос..." : "Ответ отправлен, ждём остальных..."}
+            {!isOwner && (
+              <>
+                {!qState.submitted ? (
+                  <Button onClick={handleSubmit} disabled={qState.selected.length === 0} className="w-full">
+                    Отправить ответ
+                  </Button>
+                ) : (
+                  <div className="p-4 rounded-lg text-sm bg-muted text-muted-foreground">
+                    {phase === "question_end" ? "Ждём следующий вопрос..." : "Ответ отправлен, ждём остальных..."}
+                  </div>
+                )}
+              </>
+            )}
+
+            {isOwner && (
+              <div className="p-4 rounded-lg text-sm bg-muted text-muted-foreground text-center">
+                Вы наблюдаете за игрой
               </div>
             )}
           </CardContent>
