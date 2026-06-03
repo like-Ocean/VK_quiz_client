@@ -84,6 +84,7 @@ export function useRoomSocket(roomId: string | undefined) {
                     reconnectCount.current = 0;
                 },
                 onMessage: (event) => {
+                    console.log("[WS IN]", event);
                     setRoomState((prev) => reduce(prev, event));
                 },
                 onClose: () => {
@@ -109,7 +110,10 @@ export function useRoomSocket(roomId: string | undefined) {
 
     const send = useCallback((payload: ClientWsEvent) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
+            console.log("[WS OUT]", payload);
             wsRef.current.send(JSON.stringify(payload));
+        }else {
+            console.warn("[WS OUT SKIPPED] socket not open", payload);
         }
     }, []);
 

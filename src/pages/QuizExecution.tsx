@@ -131,7 +131,7 @@ export default function QuizExecution() {
           </div>
           <div className="px-4 py-2 bg-card rounded-lg border border-border">
             <p className="text-sm text-muted-foreground">Вопрос</p>
-            <p className="font-mono">{currentQuestion.index}/{currentQuestion.total}</p>
+            <p className="font-mono">{currentQuestion.index + 1}/{currentQuestion.total}</p>
           </div>
         </div>
 

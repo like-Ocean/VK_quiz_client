@@ -4,7 +4,7 @@ import { ActivitySection } from "@/components/dashboard/ActivitySection";
 import { JoinQuizCard } from "@/components/dashboard/JoinQuizCard";
 import { OrganizerCtaCard } from "@/components/dashboard/OrganizerCtaCard";
 import { OrganizerSection } from "@/components/dashboard/OrganizerSection";
-import { organizerQuizzes, participantHistory } from "@/lib/mockData";
+import { organizerQuizzes } from "@/lib/mockData";
 import { useMe } from "@/hooks/useMe";
 import { useMyHistory, useMyQuizzes } from "@/hooks/useUser";
 import type { ParticipationHistory, QuizSummary } from "@/types/quiz";
@@ -17,7 +17,7 @@ export default function Dashboard() {
   const { data: myHistory } = useMyHistory();
 
   const quizzes: QuizSummary[] = (myQuizzes ?? organizerQuizzes).map(mapQuizSummary);
-  const history: ParticipationHistory[] = (myHistory ?? participantHistory).map(mapHistoryItem);
+  const history: ParticipationHistory[] = (myHistory ?? []).map(mapHistoryItem);
 
   function handleCreateQuiz() {
     if (!user) {
@@ -49,7 +49,6 @@ export default function Dashboard() {
           onMonitor={(id) => navigate(`/quiz/${id}/monitor`)}
           onResults={(id) => navigate(`/results/${id}`)}
         />
-
         <ActivitySection
           history={history}
           onOpenResult={(id) => navigate(`/results/${id}`)}
@@ -68,7 +67,7 @@ function mapQuizSummary(item: UserQuizResponse | QuizSummary): QuizSummary {
     questions: item.questions ?? 0,
     timeLimit: item.time_per_question ?? 0,
     status: item.status ?? "draft",
-    participants: item.participants ?? 0,
+    participants: item.participants_count ?? 0,
   };
 }
 
@@ -79,11 +78,11 @@ function mapHistoryItem(
   return {
     id: item.room_id,
     title: item.quiz_title,
-    category: "Без категории",
+    category: item.category ?? "Без категории",
     score: item.score,
-    totalPoints: Math.max(item.score, 1),
+    totalPoints: item.total_points,
     rank: item.leaderboard_position ?? 0,
-    totalParticipants: 0,
+    totalParticipants: item.total_participants, 
     completedAt: item.finished_at,
   };
 }

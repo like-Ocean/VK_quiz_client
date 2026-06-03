@@ -2,6 +2,7 @@ import { Clock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ParticipationHistory } from "@/types/quiz";
+import { formatDate } from "@/helpers/formatDate";
 
 interface ActivitySectionProps {
   history: ParticipationHistory[];
@@ -77,7 +78,8 @@ export function ActivitySection({ history, onOpenResult }: ActivitySectionProps)
                       <Trophy className="w-4 h-4" /> {item.category}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" /> {item.completedAt}
+                      <Clock className="w-4 h-4" /> 
+                      Завершено {formatDate(item.completedAt)}
                     </span>
                   </div>
                 </div>
