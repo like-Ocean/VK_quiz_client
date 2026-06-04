@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createRoom, fetchParticipants,
+  createRoom, fetchKickReasons, fetchParticipants,
   fetchResults, fetchRoom,
   fetchRoomByJoinCode,
   joinRoom, kickParticipant,
@@ -68,5 +68,12 @@ export function useRoomByJoinCode(joinCode?: string) {
     queryKey: ["room", "by-code", joinCode],
     queryFn: () => fetchRoomByJoinCode(joinCode!),
     enabled: !!joinCode,
+  });
+}
+
+export function useKickReasons() {
+  return useQuery({
+    queryKey: ["kick-reasons"],
+    queryFn: fetchKickReasons,
   });
 }

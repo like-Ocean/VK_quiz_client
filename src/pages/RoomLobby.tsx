@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
-import { useRoom, useParticipants, useKick } from "@/hooks/useRooms";
+import { KickDialog } from "@/components/room/KickDialog";
+import { useRoom, useParticipants, useKick, useKickReasons } from "@/hooks/useRooms";
 import { useQuiz } from "@/hooks/useQuizzes";
 import { useMe } from "@/hooks/useMe";
 import { useRoomSocketContext } from "@/context/RoomSocketContext";
@@ -17,7 +18,11 @@ export default function RoomLobby() {
   const { data: room, isLoading: roomLoading } = useRoom(roomId);
   const { data: quiz } = useQuiz(room?.quiz_id);
   const kick = useKick(roomId ?? "");
-  
+  const { data: kickReasons = [] } = useKickReasons();
+
+  const [kickTarget, setKickTarget] = useState<{ id: string; name: string } | null>(null);
+  const [selectedReason, setSelectedReason] = useState("");
+  const [kickComment, setKickComment] = useState("");
 
   const { roomState, startQuiz } = useRoomSocketContext();
 
@@ -49,9 +54,29 @@ export default function RoomLobby() {
     toast.success("Код скопирован!");
   }
 
+  function handleKickConfirm() {
+    if (!kickTarget) return;
+    kick.mutate(
+      {
+        participant_id: kickTarget.id,
+        reason_id: selectedReason || undefined,
+        comment: kickComment.trim() || undefined,
+      } satisfies KickRequest,
+      {
+        onSuccess: () => {
+          toast.success(`${kickTarget.name} удалён из комнаты`);
+          setKickTarget(null);
+          setSelectedReason("");
+          setKickComment("");
+        },
+        onError: () => toast.error("Не удалось удалить участника"),
+      }
+    );
+  }
+
   if (roomLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         <p className="text-muted-foreground">Загрузка комнаты...</p>
       </div>
@@ -135,7 +160,7 @@ export default function RoomLobby() {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:text-destructive shrink-0"
-                        onClick={() => kick.mutate({ participant_id: p.id } satisfies KickRequest)}
+                        onClick={() => setKickTarget({ id: p.id, name: p.display_name })}
                         disabled={kick.isPending}
                       >
                         <UserX className="w-4 h-4" />
@@ -148,6 +173,22 @@ export default function RoomLobby() {
           </div>
         </div>
       </main>
+
+      <KickDialog
+        target={kickTarget}
+        reasons={kickReasons}
+        selectedReason={selectedReason}
+        comment={kickComment}
+        isPending={kick.isPending}
+        onReasonChange={setSelectedReason}
+        onCommentChange={setKickComment}
+        onConfirm={handleKickConfirm}
+        onClose={() => {
+          setKickTarget(null);
+          setSelectedReason("");
+          setKickComment("");
+        }}
+      />
     </div>
   );
 }

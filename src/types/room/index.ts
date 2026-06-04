@@ -42,6 +42,11 @@ export interface KickRequest {
   comment?: string;
 }
 
+export interface KickReason {
+  id: string;
+  label: string;
+}
+
 export interface LeaderboardEntry {
   participant_id: string;
   display_name: string;

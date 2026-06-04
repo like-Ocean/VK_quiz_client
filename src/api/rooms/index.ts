@@ -40,3 +40,8 @@ export async function fetchRoomByJoinCode(joinCode: string): Promise<RoomRespons
   const { data } = await api.get<RoomResponse>(`/rooms/by-code/${joinCode}`);
   return data;
 }
+
+export async function fetchKickReasons() {
+  const res = await api.get('/rooms/kick-reasons');
+  return res.data as { id: string; label: string }[];
+}
