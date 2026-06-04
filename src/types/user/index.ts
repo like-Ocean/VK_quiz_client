@@ -45,4 +45,5 @@ export interface UserQuizResponse {
   questions_count?: number;
   participants_count?: number;
   room_status?: "waiting" | "active" | "finished";
+  created_at: string;
 }

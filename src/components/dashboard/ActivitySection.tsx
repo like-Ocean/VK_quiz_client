@@ -20,8 +20,7 @@ export function ActivitySection({ history, onOpenResult }: ActivitySectionProps)
   return (
     <section>
       <div className="mb-6">
-        <h2>Недавняя активность</h2>
-        <p className="text-muted-foreground mt-1">Твоя последняя викторина</p>
+        <h2>Твоя недавняя активность</h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">

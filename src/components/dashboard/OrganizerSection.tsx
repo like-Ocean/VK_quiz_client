@@ -24,7 +24,7 @@ export function OrganizerSection({
   onMonitor, onResults,
 }: OrganizerSectionProps) {
   const totalQuizzes = quizzes.length;
-  const activeQuizzes = quizzes.filter((q) => q.status === "active").length;
+  // const activeQuizzes = quizzes.filter((q) => q.status === "active").length;
   const totalParticipants = quizzes.reduce((sum, q) => sum + (q.participants ?? 0), 0);
 
   return (
@@ -44,7 +44,7 @@ export function OrganizerSection({
 
       {isAuthed ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 mb-8">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -54,19 +54,6 @@ export function OrganizerSection({
                   </div>
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                     <Trophy className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Активные викторины</p>
-                    <p className="text-3xl mt-1">{activeQuizzes}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-chart-2/20 rounded-full flex items-center justify-center">
-                    <Play className="w-6 h-6 text-chart-2" />
                   </div>
                 </div>
               </CardContent>

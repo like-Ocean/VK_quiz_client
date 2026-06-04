@@ -4,20 +4,32 @@ import { ActivitySection } from "@/components/dashboard/ActivitySection";
 import { JoinQuizCard } from "@/components/dashboard/JoinQuizCard";
 import { OrganizerCtaCard } from "@/components/dashboard/OrganizerCtaCard";
 import { OrganizerSection } from "@/components/dashboard/OrganizerSection";
-import { organizerQuizzes } from "@/lib/mockData";
 import { useMe } from "@/hooks/useMe";
 import { useMyHistory, useMyQuizzes } from "@/hooks/useUser";
 import type { ParticipationHistory, QuizSummary } from "@/types/quiz";
 import type { ParticipationHistoryResponse, UserQuizResponse } from "@/types/user";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data: user } = useMe();
   const { data: myQuizzes } = useMyQuizzes();
   const { data: myHistory } = useMyHistory();
+  const [historyLimit, setHistoryLimit] = useState(5);
 
-  const quizzes: QuizSummary[] = (myQuizzes ?? organizerQuizzes).map(mapQuizSummary);
-  const history: ParticipationHistory[] = (myHistory ?? []).map(mapHistoryItem);
+  
+  const quizzes: QuizSummary[] = (myQuizzes ?? [])
+    .slice()
+    .sort((a, b) => {
+      const aDate = new Date(a.created_at).getTime();
+      const bDate = new Date(b.created_at).getTime();
+      return bDate - aDate;
+    })
+    .slice(0, 3)
+    .map(mapQuizSummary);
+  const fullHistory: ParticipationHistory[] = (myHistory ?? []).map(mapHistoryItem);
+  const history = fullHistory.slice(0, historyLimit);
 
   function handleCreateQuiz() {
     if (!user) {
@@ -49,10 +61,26 @@ export default function Dashboard() {
           onMonitor={(id) => navigate(`/quiz/${id}/monitor`)}
           onResults={(id) => navigate(`/results/${id}`)}
         />
+        <div className="mt-4 flex justify-center">
+          <Button variant="outline" onClick={() => navigate("/quizzes")}>
+            Смотреть все квизы
+          </Button>
+        </div>
         <ActivitySection
           history={history}
           onOpenResult={(id) => navigate(`/results/${id}`)}
         />
+        {fullHistory.length > history.length && (
+          <div className="mt-4 flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setHistoryLimit((prev) => prev + 5)}
+            >
+              Показать ещё
+            </Button>
+          </div>
+        )}
       </main>
     </div>
   );

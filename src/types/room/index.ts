@@ -46,6 +46,9 @@ export interface LeaderboardEntry {
   participant_id: string;
   display_name: string;
   score: number;
+  total: number;
+  correct: number;
+  questions: number;
 }
 
 export type ServerWsEvent =

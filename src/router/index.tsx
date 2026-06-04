@@ -20,13 +20,11 @@ export const router = createBrowserRouter([
   { path: "/profile", element: <Profile /> },
   { path: "/quizzes", element: <Quizzes /> },
 
-  // Organizer flow
   { path: "/quiz/new", element: <CreateQuiz /> },
   { path: "/quiz/:quizId/edit", element: <CreateQuiz /> },
   { path: "/quiz/:quizId/launch", element: <LaunchRoom /> },
   { path: "/quiz/:quizId/monitor", element: <Results /> },
 
-  // Join flow
   { path: "/join", element: <JoinRoom /> },
   { path: "/join/:joinCode", element: <JoinRoom /> },
 
@@ -39,7 +37,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  { path: "/results/:quizId", element: <Results /> },
+  { path: "/results/:roomId", element: <Results /> },
 
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
