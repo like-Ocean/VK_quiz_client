@@ -6,8 +6,9 @@ import { useRoom, useParticipants, useKick } from "@/hooks/useRooms";
 import { useQuiz } from "@/hooks/useQuizzes";
 import { useMe } from "@/hooks/useMe";
 import { useRoomSocketContext } from "@/context/RoomSocketContext";
-import { Copy, Play, UserX } from "lucide-react";
+import { Copy, Loader2, Play, UserX } from "lucide-react";
 import type { KickRequest } from "@/types/room";
+import { toast } from "sonner";
 
 export default function RoomLobby() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -45,11 +46,13 @@ export default function RoomLobby() {
       document.execCommand("copy");
       document.body.removeChild(el);
     }
+    toast.success("Код скопирован!");
   }
 
   if (roomLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         <p className="text-muted-foreground">Загрузка комнаты...</p>
       </div>
     );
@@ -69,10 +72,6 @@ export default function RoomLobby() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-semibold">{quiz?.title ?? "Загрузка..."}</h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {quiz ? `${quiz.questions_count ?? "—"} вопросов · ` : ""}
-            Ожидание участников
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -103,7 +102,7 @@ export default function RoomLobby() {
               </Button>
             ) : (
               <div className="rounded-xl border border-border bg-card p-4 text-center text-sm text-muted-foreground">
-                Ожидайте, пока хозяин начнёт игру...
+                Ожидайте, пока организатор начнёт игру...
               </div>
             )}
           </div>

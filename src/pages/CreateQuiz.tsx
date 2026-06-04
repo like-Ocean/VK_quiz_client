@@ -12,6 +12,14 @@ import { useCreateQuiz, useUpdateQuiz } from "@/hooks/useQuizzes";
 import { useQuizForm, isLocalId } from "@/hooks/useQuizForm";
 import { mapDraftToPayload } from "@/helpers/quizMappers";
 
+function normalizeOption(text: string) {
+  const trimmed = text.trim();
+  if (!trimmed) return "";
+
+  return trimmed[0].toUpperCase() + trimmed.slice(1);
+}
+
+
 export default function CreateQuiz() {
   const navigate = useNavigate();
   const { quizId } = useParams<{ quizId?: string }>();
@@ -75,13 +83,19 @@ function handleSave() {
     return;
   }
 
+  const normalizedQuestions = questions.map((q) => ({
+    ...q,
+    question: q.question.trim(),
+    options: q.options.map((opt) => normalizeOption(opt)),
+  }));
+
   const normalizedCategoryId = categoryData?.some((c) => c.id === categoryId)
     ? categoryId
     : undefined;
 
   const payload = {
-    title,
-    description: description || undefined,
+    title: title.trim(),
+    description: description.trim(),
     category_id: normalizedCategoryId,
     time_per_question: timeLimit,
     is_public: true,
@@ -92,7 +106,7 @@ function handleSave() {
       { quizId, payload },
       {
         onSuccess: () => {
-          const ops = questions.map((q, i) => {
+          const ops = normalizedQuestions.map((q, i) => {
             const qPayload = mapDraftToPayload(q, i + 1);
             return isLocalId(q.id)
               ? createQuestion.mutateAsync({ quizId, payload: qPayload })
@@ -108,7 +122,7 @@ function handleSave() {
   createQuiz.mutate(payload, {
     onSuccess: async (created) => {
       await Promise.all(
-        questions.map((q, i) =>
+        normalizedQuestions.map((q, i) =>
           createQuestion.mutateAsync({
             quizId: created.id,
             payload: mapDraftToPayload(q, i + 1),

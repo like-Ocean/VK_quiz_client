@@ -6,6 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LabeledInput } from "@/components/LabeledInput";
 import { useChangePassword, useUpdateMe } from "@/hooks/useUser";
 import { useMe } from "@/hooks/useMe";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+const errorMap: Record<string, string> = {
+  "Email already in use": "Email уже занят",
+  "Username already in use": "Имя пользователя уже занято",
+  "Old password is incorrect": "Неверный текущий пароль",
+};
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  const raw = (error as any)?.response?.data?.detail ?? "";
+  return errorMap[raw] ?? fallback;
+}
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -15,62 +28,48 @@ export default function Profile() {
 
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [profileError, setProfileError] = useState("");
-  const [profileSuccess, setProfileSuccess] = useState("");
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
     if (!me) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEmail(me.email);
     setUsername(me.username);
   }, [me]);
 
   function handleProfileSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setProfileError("");
-    setProfileSuccess("");
-
     updateMe.mutate(
       { email, username },
       {
-        onSuccess: () => {
-          setProfileSuccess("Профиль обновлен");
-        },
-        onError: () => {
-          setProfileError("Не удалось обновить профиль");
-        },
+        onSuccess: () => toast.success("Профиль обновлён"),
+        onError: (error: unknown) =>
+          toast.error(getErrorMessage(error, "Не удалось обновить профиль")),
       },
     );
   }
 
   function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
-
     if (!oldPassword || !newPassword) return;
     if (newPassword !== confirmPassword) {
-      setPasswordError("Пароли не совпадают");
+      toast.error("Пароли не совпадают");
       return;
     }
-
     changePassword.mutate(
       { old_password: oldPassword, new_password: newPassword },
       {
         onSuccess: () => {
-          setPasswordSuccess("Пароль обновлен");
+          toast.success("Пароль обновлён");
           setOldPassword("");
           setNewPassword("");
           setConfirmPassword("");
         },
-        onError: () => {
-          setPasswordError("Не удалось изменить пароль");
-        },
+        onError: (error: unknown) =>
+          toast.error(getErrorMessage(error, "Не удалось изменить пароль")),
       },
     );
   }
@@ -84,6 +83,7 @@ export default function Profile() {
             Назад
           </Button>
         </div>
+
         <Card>
           <CardHeader>
             <CardTitle>
@@ -92,7 +92,10 @@ export default function Profile() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Загрузка профиля...</p>
+              <div className="flex items-center gap-2 text-muted-foreground py-4">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Загрузка профиля...</span>
+              </div>
             ) : (
               <form className="space-y-4" onSubmit={handleProfileSubmit}>
                 <LabeledInput
@@ -106,12 +109,15 @@ export default function Profile() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
-                {profileError && <p className="text-sm text-destructive">{profileError}</p>}
-                {profileSuccess && (
-                  <p className="text-sm text-chart-2">{profileSuccess}</p>
-                )}
                 <Button type="submit" disabled={updateMe.isPending}>
-                  Сохранить изменения
+                  {updateMe.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Сохранение...
+                    </>
+                  ) : (
+                    "Сохранить изменения"
+                  )}
                 </Button>
               </form>
             )}
@@ -144,12 +150,15 @@ export default function Profile() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
-              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
-              {passwordSuccess && (
-                <p className="text-sm text-chart-2">{passwordSuccess}</p>
-              )}
               <Button type="submit" disabled={changePassword.isPending}>
-                Обновить пароль
+                {changePassword.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Обновление...
+                  </>
+                ) : (
+                  "Обновить пароль"
+                )}
               </Button>
             </form>
           </CardContent>

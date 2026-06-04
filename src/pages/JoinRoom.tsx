@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useJoinRoom } from "@/hooks/useRooms";
 import { useMe } from "@/hooks/useMe";
 import { setGuestToken } from "@/store/tokenStore";
+import { Loader2 } from "lucide-react";
 
 export default function JoinRoom() {
   const { joinCode: codeFromUrl } = useParams<{ joinCode?: string }>();
@@ -72,7 +73,14 @@ export default function JoinRoom() {
             onClick={handleJoin}
             disabled={!code.trim() || (!me && !guestName.trim()) || joinRoom.isPending}
           >
-            {joinRoom.isPending ? "Подключение..." : "Войти"}
+            {joinRoom.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Подключение...
+              </>
+            ) : (
+              "Войти"
+            )}
           </Button>
 
           {joinRoom.isError && (

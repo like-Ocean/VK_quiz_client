@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trophy } from 'lucide-react';
+import { Loader2, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LabeledInput } from '@/components/LabeledInput';
@@ -20,7 +20,7 @@ export default function Register() {
       setError('');
       if (!name || !email || !password) return;
       if (password !== confirm) {
-          setError('Passwords do not match');
+          setError('Пароли не совпадают');
           return;
       }
       registerMutation.mutate(
@@ -30,7 +30,7 @@ export default function Register() {
             navigate('/dashboard');
           },
           onError: () => {
-            setError('Registration failed. Please try again.');
+            setError('Ошибка регистрации. Попробуйте ещё раз.');
           },
         },
       );
@@ -82,9 +82,15 @@ export default function Register() {
                 required
               />
               {error && <p className="text-sm text-destructive">{error}</p>}
-
-                <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-                  Создать аккаунт
+              <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
+                {registerMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Создание аккаунта...
+                  </>
+                ) : (
+                  'Создать аккаунт'
+                )}
               </Button>
           </form>
 

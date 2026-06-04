@@ -6,7 +6,7 @@ import { QuizFilters } from "@/components/quiz/QuizFilters";
 import { QuizRow } from "@/components/quiz/QuizRow";
 import { useQuizzes } from "@/hooks/useQuizzes";
 import { useMe } from "@/hooks/useMe";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Quizzes() {
@@ -28,10 +28,7 @@ export default function Quizzes() {
     page_size: 10,
   });
 
-  function handleFilterChange(fn: () => void) {
-    fn();
-    setPage(1);
-  }
+  function handleFilterChange(fn: () => void) {fn(); setPage(1);}
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,7 +58,11 @@ export default function Quizzes() {
           />
         </div>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-15 h-15 animate-spin text-muted-foreground" />
+          </div>
+        )}
         {!isLoading && data?.total === 0 && (
           <p className="text-sm text-muted-foreground">Ничего не найдено</p>
         )}
@@ -90,7 +91,11 @@ export default function Quizzes() {
                 {p}
               </Button>
             ))}
-            <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={page === data.total_pages}>
+            <Button 
+              variant="outline" 
+              size="sm" onClick={() => setPage((p) => p + 1)}
+              disabled={page === data.total_pages}
+            >
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

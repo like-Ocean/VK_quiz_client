@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCreateRoom } from "@/hooks/useRooms";
+import { Loader2 } from "lucide-react";
 
 export default function LaunchRoom() {
   const { quizId } = useParams<{ quizId: string }>();
@@ -25,7 +26,8 @@ export default function LaunchRoom() {
   }, [quizId]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       <p className="text-muted-foreground">Создание комнаты...</p>
     </div>
   );

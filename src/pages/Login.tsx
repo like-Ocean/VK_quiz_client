@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trophy } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LabeledInput } from '@/components/LabeledInput';
@@ -24,7 +24,7 @@ export default function Login() {
                     navigate('/dashboard');
                 },
                 onError: () => {
-                    setError('Login failed. Check your credentials.');
+                    setError('Авторизация завершена неудачно. Пожалуйста, попробуйте еще раз.');
                 },
             },
         );
@@ -38,7 +38,7 @@ export default function Login() {
                         <Trophy className="w-8 h-8 text-primary-foreground" />
                     </div>
                     <CardTitle>
-                        <h2>Дрбро пожаловать в VK Quiz</h2>
+                        <h2>Добро пожаловать в VK Quiz</h2>
                     </CardTitle>
                     <p className="text-muted-foreground mt-2">Войдите, чтобы продолжить</p>
                 </CardHeader>
@@ -55,13 +55,20 @@ export default function Login() {
                         <LabeledInput
                             type="password"
                             label="Пароль"
-                            placeholder="Enter your password"
+                            placeholder="Введите ваш пароль"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                         <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-                            Войти
+                        {loginMutation.isPending ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Входим...
+                            </>
+                        ) : (
+                            'Войти'
+                        )}
                         </Button>
                         {error && <p className="text-sm text-destructive">{error}</p>}
                     </form>

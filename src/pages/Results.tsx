@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Trophy, Medal, Award, Home } from "lucide-react";
+import { Trophy, Medal, Award, Home, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useResults } from "@/hooks/useRooms";
@@ -42,6 +42,7 @@ export default function Results() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-sm text-muted-foreground">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           Загрузка результатов...
         </p>
       </div>
