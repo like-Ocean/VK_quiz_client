@@ -1,7 +1,7 @@
 import { getAccessToken, getGuestToken } from "@/store/tokenStore";
 import type { ClientWsEvent, ServerWsEvent } from "@/types/room";
 
-const WS_BASE = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8000/api/ws";
+const WS_BASE = import.meta.env.PUBLIC_WS_BASE_URL ?? "ws://localhost:8000/api/ws";
 
 export interface WsConnection {
   ws: WebSocket;

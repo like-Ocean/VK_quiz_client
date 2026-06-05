@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import { useCategories } from "@/hooks/useCategories";
 import { useQuiz } from "@/hooks/useQuizzes";
 import { useQuestions } from "@/hooks/useQuestions";
-import { categories as mockCategories } from "@/lib/mockData";
 import type { CategoryResponse } from "@/types/category";
 import type { QuestionDraft, QuestionResponse } from "@/types/quiz";
 
@@ -53,8 +52,7 @@ export function useQuizForm(quizId?: string) {
   const [questions, setQuestions] = useState<QuestionDraft[]>([makeQuestion()]);
 
   const categoryOptions = useMemo<CategoryResponse[]>(() => {
-    if (categoryData && categoryData.length > 0) return categoryData;
-    return mockCategories.map((name) => ({ id: name, name }));
+    return categoryData ?? [];
   }, [categoryData]);
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/store/tokenStore';
 import type { RefreshTokenRequest, TokenResponse } from '@/types/auth';
 
-const baseURL = import.meta.env.API_BASE_URL ?? 'http://localhost:8000/api';
+const baseURL = import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api';
 
 export const api: AxiosInstance = axios.create({
     baseURL,

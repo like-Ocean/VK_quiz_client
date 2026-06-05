@@ -89,14 +89,10 @@ function handleSave() {
     options: q.options.map((opt) => normalizeOption(opt)),
   }));
 
-  const normalizedCategoryId = categoryData?.some((c) => c.id === categoryId)
-    ? categoryId
-    : undefined;
-
   const payload = {
     title: title.trim(),
     description: description.trim(),
-    category_id: normalizedCategoryId,
+    category_id: categoryId || undefined,
     time_per_question: timeLimit,
     is_public: true,
   };
