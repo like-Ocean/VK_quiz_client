@@ -147,7 +147,7 @@ export default function Results() {
                         <div>
                           <h4>{entry.name}</h4>
                           <p className="text-sm text-muted-foreground mt-0.5">
-                            {entry.correct}/{entry.questions} correct
+                            {entry.correct}/{entry.questions} Верно
                           </p>
                         </div>
                       </div>

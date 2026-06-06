@@ -38,7 +38,7 @@ export interface UserQuizResponse {
   id: string;
   title: string;
   status?: "draft" | "active" | "completed";
-  category?: string | null;
+  category_name ?: string | null;
   questions?: number | null;
   time_per_question?: number | null;
   participants?: number | null;

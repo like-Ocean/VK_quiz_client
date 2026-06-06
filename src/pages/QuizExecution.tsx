@@ -142,7 +142,7 @@ export default function QuizExecution() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-muted-foreground" />
                   <span className={`text-xl ${qState.timeLeft <= 5 ? "text-destructive" : "text-foreground"}`}>
-                    {qState.timeLeft}s
+                    {qState.timeLeft}с
                   </span>
                 </div>
                 {multipleChoice && (

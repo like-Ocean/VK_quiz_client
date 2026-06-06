@@ -99,7 +99,7 @@ export default function Profile() {
             ) : (
               <form className="space-y-4" onSubmit={handleProfileSubmit}>
                 <LabeledInput
-                  label="Email"
+                  label="Почта"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

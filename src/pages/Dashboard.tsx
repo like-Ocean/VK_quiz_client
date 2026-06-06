@@ -91,8 +91,8 @@ function mapQuizSummary(item: UserQuizResponse | QuizSummary): QuizSummary {
   return {
     id: item.id,
     title: item.title,
-    category: item.category ?? "Без категории",
-    questions: item.questions ?? 0,
+    category: item.category_name  ?? "Без категории",
+    questions: item.questions_count  ?? 0,
     timeLimit: item.time_per_question ?? 0,
     status: item.status ?? "draft",
     participants: item.participants_count ?? 0,
